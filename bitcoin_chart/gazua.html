@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>가즈아~!</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <style>
+    #list{
+      width: 1200px;
+      border: 1px solid black;
+      border-collapse: collapse;
+    }
+    #list td, #list th{
+      border: 1px solid black;
+      text-align: center;
+    }
+    #list > thead > tr{
+      color: yellow;
+      background-color: purple;
+    }
+    [v-cloak] { display: none; }
+  </style>
+
+</head>
+
+<body>
+  <div id="example" class="container" cloak>
+    <p>
+      시간 (분) : <select v-model="time" class="form-control" required>
+        <option>1</option>
+        <option>3</option>
+        <option>5</option>
+        <option>10</option>
+        <option>15</option>
+        <option>30</option>
+        <option>60</option>
+        <option>240</option>
+      </select>
+    </p>
+    <p>
+      코인코드 : <input type="text" v-model="coinname" class="form-control">
+    </p>
+    <p>
+      표시 개수 : <input type="text" v-model="count" class="form-control">
+    </p>
+    <p>
+      <button id="submit" @click="submit" class="btn btn-primary">확인</button>
+    </p>
+    <table id="list">
+      <thead>
+        <tr>
+          <th>시간</th>
+          <th>시가</th>
+          <th>고가</th>
+          <th>저가</th>
+          <th>종가</th>
+          <th>거래량(BTC)</th>
+        </tr>
+      </thead>
+      <tbody id="chartList">
+        <tr v-for="chart in chartList">
+          <td>{{chart.candleDateTimeKst}}</td>
+          <td>{{chart.openingPrice}}</td>
+          <td>{{chart.highPrice}}</td>
+          <td>{{chart.lowPrice}}</td>
+          <td>{{chart.tradePrice}}</td>
+          <td>{{chart.candleAccTradeVolume}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script src="https://unpkg.com/vue/dist/vue.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-promise/4.1.1/es6-promise.auto.min.js"></script>
+
+
+  <script type="text/javascript">
+    var vm = new Vue({
+      el : '#example',
+      data : {
+        time : "",
+        coinname : "",
+        count : "",
+        isProcessing : false,
+        chartList : []
+      },
+
+      methods : {
+        submit : function(e){
+          if(true){
+            this.fetchChartList();
+          }else{
+            this.chartList = [];
+          }
+        },
+        fetchChartList : function(){
+          this.chartList = [];
+          this.isProcessing = true;
+          this.coinname = this.coinname.toUpperCase();
+          var url = "https://crix-api.upbit.com/v1/crix/candles/minutes/" + this.time + "?code=CRIX.UPBIT.KRW-" + this.coinname + "&count=" + this.count + "&ciqrandom=1509540252193";
+
+          var vm = this;
+
+          fetch(url).then(function(response){
+            return response.json()
+          }).then(function(json){
+            vm.chartList = json;
+            vm.isProcessing = false;
+          }).catch(function(ex){
+            console.log('parsing failed', ex);
+            vm.chartList = [];
+            vm.isProcessing = false;
+          })
+        }
+      }
+    });
+  </script>
+</body>
+</html>
